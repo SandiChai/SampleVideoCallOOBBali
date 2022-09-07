@@ -1,0 +1,98 @@
+{
+  "project_info": {
+    "project_number": "1013064732570",
+    "project_id": "dial-openvidu",
+    "storage_bucket": "dial-openvidu.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1013064732570:android:6d084f05f6ec431af97423",
+        "android_client_info": {
+          "package_name": "com.acs.dial_videocall"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1013064732570-gngkid9cac8ne7sid0rc5lehr3pot32u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.acs.dial_videocall",
+            "certificate_hash": "918b293d0ba16c773477d90f008778fda842c064"
+          }
+        },
+        {
+          "client_id": "1013064732570-9vjmmqkpsp9nqehl057p3slat0kun23c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCqyx6FEcgwssbOda8plUbu_vO2tzY0crc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1013064732570-9vjmmqkpsp9nqehl057p3slat0kun23c.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1013064732570-2r45uiu37nvtlm5koobgepblvqc493u1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.dial-openvidu"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1013064732570:android:414ddcecaa130a1df97423",
+        "android_client_info": {
+          "package_name": "com.dial_openvidu"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1013064732570-13tud8kbvnff7jfca9hks16da6kq1tks.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dial_openvidu",
+            "certificate_hash": "918b293d0ba16c773477d90f008778fda842c064"
+          }
+        },
+        {
+          "client_id": "1013064732570-9vjmmqkpsp9nqehl057p3slat0kun23c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCqyx6FEcgwssbOda8plUbu_vO2tzY0crc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1013064732570-9vjmmqkpsp9nqehl057p3slat0kun23c.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1013064732570-2r45uiu37nvtlm5koobgepblvqc493u1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.dial-openvidu"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

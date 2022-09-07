@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>1013064732570-vco9cml2u9frd8c0vlvlio2esb6khjll.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.1013064732570-vco9cml2u9frd8c0vlvlio2esb6khjll</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>1013064732570-13tud8kbvnff7jfca9hks16da6kq1tks.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAr7Q8aiDdLC3Cq5Ad0g25ZZHKTXaERDjE</string>
+	<key>GCM_SENDER_ID</key>
+	<string>1013064732570</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.acs.dial.videocall</string>
+	<key>PROJECT_ID</key>
+	<string>dial-openvidu</string>
+	<key>STORAGE_BUCKET</key>
+	<string>dial-openvidu.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:1013064732570:ios:c1490befe65a6148f97423</string>
+</dict>
+</plist>
