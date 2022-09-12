@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:dial_videocall/dial_make_videocall.dart';
 import 'package:dial_videocall/dial_videocall.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -7,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
-import 'package:wakelock/wakelock.dart';
 
 class MyHome extends StatefulWidget {
   final String firebaseToken;
@@ -18,14 +14,21 @@ class MyHome extends StatefulWidget {
 }
 
 class _MyHomeState extends State<MyHome> with WidgetsBindingObserver {
-  static const platform = const MethodChannel('flutter.native/powerOff');
   bool isOnCall;
   bool _isAccept;
   TextEditingController _textFirebaseTokenController;
   String sessionFrom;
   String sessionTo;
+
+  String _callid;
+  String _videoMinRecvBandwidth;
+  String _videoMaxSendBandwidth;
+  String _videoMaxRecvBandwidth;
+  String _videoMinSendBandwidth;
+
   SharedPreferences prefs;
 
+  static const platform = MethodChannel('flutter.native/powerOff');
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -46,16 +49,13 @@ class _MyHomeState extends State<MyHome> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    isOnCall = false;
-    //_isAccept = false;
+    setState(() {
+      isOnCall = false;
+      _isAccept = false;
+    });
     _textFirebaseTokenController =
         TextEditingController(text: widget.firebaseToken);
     _asyncMethod();
-
-    // print("Sleep START");
-    // sleep(Duration(seconds: 12));
-    // Wakelock.enable();
-    // print("Sleep END");
   }
 
   void _asyncMethod() async {
@@ -79,33 +79,69 @@ class _MyHomeState extends State<MyHome> with WidgetsBindingObserver {
     if (initialMessage?.data != null) {
       sessionFrom = await initialMessage.data['session_from'];
       sessionTo = await initialMessage.data['session_to'];
+
+      _callid = await initialMessage.data['callid'];
+      _videoMinRecvBandwidth =
+          await initialMessage.data['videoMinRecvBandwidth'];
+      _videoMaxSendBandwidth =
+          await initialMessage.data['videoMaxSendBandwidth'];
+      _videoMaxRecvBandwidth =
+          await initialMessage.data['videoMaxRecvBandwidth'];
+      _videoMinSendBandwidth =
+          await initialMessage.data['videoMinSendBandwidth'];
     }
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      if (message.notification != null) {
-        if (message.data != null) {
-          sessionFrom = message.data['session_from'];
-          sessionTo = message.data['session_to'];
-          if (sessionFrom != null && sessionTo != null) {
-            _goToCallPage();
-          }
+      if (message.data != null) {
+        sessionFrom = message.data['session_from'];
+        sessionTo = message.data['session_to'];
+
+        _callid = message.data['callid'];
+        _videoMinRecvBandwidth = message.data['videoMinRecvBandwidth'];
+        _videoMaxSendBandwidth = message.data['videoMaxSendBandwidth'];
+        _videoMaxRecvBandwidth = message.data['videoMaxRecvBandwidth'];
+        _videoMinSendBandwidth = message.data['videoMinSendBandwidth'];
+
+        if (sessionFrom != null && sessionTo != null) {
+          _goToCallPage();
         }
       }
     });
 
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
       print('Got a message whilst in the foreground!');
-      print('Message data: ${message.data}');
+      print("Handling a foreground callid : ${message.data['callid']}");
+      DialVideoCall vcall = DialVideoCall(
+        sessionFrom: message.data['session_from'],
+        sessionTo: message.data['session_to'],
+        isAnswer: null,
+        isAccept: null,
+        useName: true,
+        useMuted: true,
+        useSwitchCamera: true,
+        callid: message.data['callid'],
+        videoMinRecvBandwidth: message.data['videoMinRecvBandwidth'],
+        videoMaxSendBandwidth: message.data['videoMaxSendBandwidth'],
+        videoMaxRecvBandwidth: message.data['videoMaxRecvBandwidth'],
+        videoMinSendBandwidth: message.data['videoMinSendBandwidth'],
+      );
+      await vcall
+          .receivedNotification(message.data['session_to'])
+          .then((value) {
+        print("DARI CLIENT FIREBASE");
+      });
+      await print('Message data: ${message.data}');
+      if (message.data != null) {
+        sessionFrom = message.data['session_from'];
+        sessionTo = message.data['session_to'];
 
-      if (message.notification != null) {
-        print(
-            'Message also contained a notification: ${message.notification.toString()}');
-        if (message.data != null) {
-          sessionFrom = message.data['session_from'];
-          sessionTo = message.data['session_to'];
-          if (sessionFrom != null && sessionTo != null) {
-            _goToCallPage();
-          }
+        _callid = message.data['callid'];
+        _videoMinRecvBandwidth = message.data['videoMinRecvBandwidth'];
+        _videoMaxSendBandwidth = message.data['videoMaxSendBandwidth'];
+        _videoMaxRecvBandwidth = message.data['videoMaxRecvBandwidth'];
+        _videoMinSendBandwidth = message.data['videoMinSendBandwidth'];
+        if (sessionFrom != null && sessionTo != null) {
+          _goToCallPage();
         }
       }
     });
@@ -114,50 +150,84 @@ class _MyHomeState extends State<MyHome> with WidgetsBindingObserver {
 
     if (sessionFrom == null && sessionTo == null) {
       await prefs.reload();
-      sessionFrom = prefs.getString('session_from');
-      sessionTo = prefs.getString('session_to');
-      _isAccept = prefs.getBool('is_accept');
+      setState(() {
+        sessionFrom = prefs.getString('session_from');
+        sessionTo = prefs.getString('session_to');
+        _isAccept = prefs.getBool('is_accept');
+
+        _callid = prefs.getString('callid');
+        _videoMinRecvBandwidth = prefs.getString('videoMinRecvBandwidth');
+        _videoMaxSendBandwidth = prefs.getString('videoMaxSendBandwidth');
+        _videoMaxRecvBandwidth = prefs.getString('videoMaxRecvBandwidth');
+        _videoMinSendBandwidth = prefs.getString('videoMinSendBandwidth');
+      });
       print('is_accept : $_isAccept');
       print('sessionFrom2 : $sessionFrom');
     }
+  }
+
+  void addPermission() {
+    platform.invokeMethod("powerOff");
   }
 
   void _goToCallPage() {
     if (!isOnCall) {
       isOnCall = true;
       DialVideoCall vcall = DialVideoCall(
-          sessionFrom: sessionFrom,
-          sessionTo: sessionTo,
-          isAnswer: _isAccept == null ? false : true,
-          isAccept: _isAccept == null
-              ? true
-              : _isAccept == true
-                  ? true
-                  : false,
-          useName: true,
-          useMuted: true,
-          useSwitchCamera: true);
-      vcall.startVideoCallDev(context).then((value) {
+        sessionFrom: sessionFrom,
+        sessionTo: sessionTo,
+        isAnswer: _isAccept == null ? false : true,
+        isAccept: _isAccept == null
+            ? null
+            : _isAccept == true
+                ? true
+                : false,
+        useName: true,
+        useMuted: true,
+        useSwitchCamera: true,
+        callid: _callid,
+        videoMinRecvBandwidth: _videoMinRecvBandwidth,
+        videoMaxSendBandwidth: _videoMaxSendBandwidth,
+        videoMaxRecvBandwidth: _videoMaxRecvBandwidth,
+        videoMinSendBandwidth: _videoMinSendBandwidth,
+      );
+      vcall.startVideoCallDevV2(context).then((value) {
         isOnCall = false;
         sessionFrom = null;
         sessionTo = null;
+        _isAccept = null;
+
+        _callid = "0";
+        _videoMinRecvBandwidth = "200";
+        _videoMaxSendBandwidth = "2000";
+        _videoMaxRecvBandwidth = "2000";
+        _videoMinSendBandwidth = "200";
+
         prefs.remove('is_accept');
         prefs.remove('session_from');
         prefs.remove('session_to');
+
+        prefs.remove('callid');
+        prefs.remove('videoMinRecvBandwidth');
+        prefs.remove('videoMaxSendBandwidth');
+        prefs.remove('videoMaxRecvBandwidth');
+        prefs.remove('videoMinSendBandwidth');
       });
     }
 
     prefs.remove('is_accept');
     prefs.remove('session_from');
     prefs.remove('session_to');
-  }
 
-  Future<void> responseFromNativeCode() async {
-    try {
-      await platform.invokeMethod('powerOff');
-    } on PlatformException catch (e) {
-      print("Failed to Invoke: '${e.message}'.");
-    }
+    prefs.remove('callid');
+    prefs.remove('videoMinRecvBandwidth');
+    prefs.remove('videoMaxSendBandwidth');
+    prefs.remove('videoMaxRecvBandwidth');
+    prefs.remove('videoMinSendBandwidth');
+
+    setState(() {
+      _isAccept = false;
+    });
   }
 
   @override
@@ -223,14 +293,15 @@ class _MyHomeState extends State<MyHome> with WidgetsBindingObserver {
                     height: 30,
                   ),
                   ElevatedButton(
-                      onPressed: responseFromNativeCode
-                      // DialMakeVideoCall vcall = DialMakeVideoCall(
-                      //     callerName: 'mobile1', //this is name user
-                      //     useName: true,
-                      //     useMuted: true,
-                      //     useSwitchCamera: true);
-                      // vcall.makeVideoCallDev(context);
-                      ,
+                      onPressed: () {
+                        addPermission();
+                        // DialMakeVideoCall vcall = DialMakeVideoCall(
+                        //     callerName: 'mobile1', //this is name user
+                        //     useName: true,
+                        //     useMuted: true,
+                        //     useSwitchCamera: true);
+                        // vcall.makeVideoCallDev(context);
+                      },
                       child: Text("Make Video Call"))
                 ],
               ),

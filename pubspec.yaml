@@ -28,7 +28,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   shared_preferences: ^0.5.12+4
   flutter_app_lock: ^2.0.0
-  # firebase_core: ^0.7.0
+  firebase_core: ^0.7.0
   firebase_messaging: "^8.0.0-dev.15"
   connectycube_flutter_call_kit: ^0.0.1-dev.1
   uuid: ^2.2.2

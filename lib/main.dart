@@ -4,100 +4,167 @@ import 'package:dial_videocall_example/page/my_home.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:app_launcher/app_launcher.dart';
-import 'package:wakelock/wakelock.dart';
+import 'package:dial_videocall/dial_videocall.dart';
 
 FirebaseMessaging _messaging = FirebaseMessaging.instance;
-//SharedPreferences prefs;
+SharedPreferences prefs;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  _registerNotification();
-  //FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  // _registerNotification();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   runApp(MaterialApp(
     home: MyHome(firebaseToken: await _messaging.getToken()),
   ));
 }
 
-// Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-//   // await AppLauncher.openApp(
-//   //   androidApplicationId: "com.acs.dial_videocall",
-//   // );
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  DialVideoCall vcall = DialVideoCall(
+    sessionFrom: message.data['session_from'],
+    sessionTo: message.data['session_to'],
+    isAnswer: null,
+    isAccept: true,
+    useName: true,
+    useMuted: true,
+    useSwitchCamera: true,
+    callid: message.data['callid'],
+    videoMinRecvBandwidth: message.data['videoMinRecvBandwidth'],
+    videoMaxSendBandwidth: message.data['videoMaxSendBandwidth'],
+    videoMaxRecvBandwidth: message.data['videoMaxRecvBandwidth'],
+    videoMinSendBandwidth: message.data['videoMinSendBandwidth'],
+  );
 
-//   print("Handling a background message: ${message.messageId}");
-//   Wakelock.enable();
-//   try {
-//     // await platform.invokeMethod('powerOff');
-//     // _channel.invokeMethod('wakeFromBackground');
-//   } on PlatformException catch (e) {
-//     print("Failed to Invoke: '${e.message}'.");
-//   }
-//   print("Handling a background DONE");
-//   // ignore: unnecessary_statements
-//   print("Handling a background DONE '${PowerManager.ACQUIRE_CAUSES_WAKEUP}'.");
+  await vcall.receivedNotification(message.data['session_to']).then((value) {
+    print("DARI CLIENT FIREBASE");
+  });
 
-//   print("WAKE LOCK DONE -------------");
-//   if (Platform.isAndroid) {
-//     _showIncomingCall(message);
-//   }
-//   prefs = await SharedPreferences.getInstance();
-//   prefs.remove('is_accept');
-//   prefs.remove('session_from');
-//   prefs.remove('session_to');
-// }
+  await print("Handling a background message: ${message.messageId}");
+  print("Handling a background data : ${message.data}");
+  if (Platform.isAndroid) {
+    _showIncomingCall(message);
+  }
+  prefs = await SharedPreferences.getInstance();
+  prefs.remove('is_accept');
+  prefs.remove('session_from');
+  prefs.remove('session_to');
 
-// void _showIncomingCall(RemoteMessage message) async {
-//   ConnectycubeFlutterCallKit.instance.init(onCallAccepted: (String sessionId,
-//       int callType, int callerId, String callerName, Set opponentsIds) async {
-//     print('Telepon diangkat');
-//     await _saveSession(message.data['session_from'], message.data['session_to'],
-//         message.data['record_id'], true);
-//     // Your Logic Here When user presses Green Button on the screen.
-//     return null;
-//   }, onCallRejected: (String sessionId, int callType, int callerId,
-//       String callerName, Set opponentsIds) async {
-//     print('Telepon diakhiri');
-//     _saveSession(message.data['session_from'], message.data['session_to'],
-//         message.data['record_id'], false);
-//     print('reject ${message.data['session_from']}');
+  prefs.remove('callid');
+  prefs.remove('videoMinRecvBandwidth');
+  prefs.remove('videoMaxSendBandwidth');
+  prefs.remove('videoMaxRecvBandwidth');
+  prefs.remove('videoMinSendBandwidth');
+}
 
-//     await AppLauncher.openApp(
-//       androidApplicationId: "com.acs.dial_videocall",
-//     );
-//     // Your Logic Here When user presses Red Button on the screen.
-//     return null;
-//   });
-//   await ConnectycubeFlutterCallKit.setOnLockScreenVisibility(
-//     isVisible: true,
-//   );
+void _showIncomingCall(RemoteMessage message) async {
+  ConnectycubeFlutterCallKit.instance.init(onCallAccepted: (String sessionId,
+      int callType, int callerId, String callerName, Set opponentsIds) async {
+    print('Telepon diangkat');
+    DialVideoCall vcall = DialVideoCall(
+      sessionFrom: message.data['session_from'],
+      sessionTo: message.data['session_to'],
+      isAnswer: true,
+      isAccept: true,
+      useName: true,
+      useMuted: true,
+      useSwitchCamera: true,
+      callid: message.data['callid'],
+      videoMinRecvBandwidth: message.data['videoMinRecvBandwidth'],
+      videoMaxSendBandwidth: message.data['videoMaxSendBandwidth'],
+      videoMaxRecvBandwidth: message.data['videoMaxRecvBandwidth'],
+      videoMinSendBandwidth: message.data['videoMinSendBandwidth'],
+    );
+    vcall.acceptedCall(message.data['session_to']).then((value) {
+      print("DARI CLIENT FIREBASE");
+    });
 
-//   await ConnectycubeFlutterCallKit.showCallNotification(
-//     sessionId: Uuid().v4(),
-//     callType: 1,
-//     callerName: message.notification.title,
-//     callerId: 0,
-//     opponentsIds: {1},
-//   );
+    await _saveSession(
+        message.data['session_from'],
+        message.data['session_to'],
+        message.data['record_id'],
+        true,
+        message.data['callid'],
+        message.data['videoMinRecvBandwidth'],
+        message.data['videoMaxSendBandwidth'],
+        message.data['videoMaxRecvBandwidth'],
+        message.data['videoMinSendBandwidth']);
+    // Your Logic Here When user presses Green Button on the screen.
+    return null;
+  }, onCallRejected: (String sessionId, int callType, int callerId,
+      String callerName, Set opponentsIds) async {
+    print('Telepon diakhiri');
+    DialVideoCall vcall = DialVideoCall(
+      sessionFrom: message.data['session_from'],
+      sessionTo: message.data['session_to'],
+      isAnswer: false,
+      isAccept: true,
+      useName: true,
+      useMuted: true,
+      useSwitchCamera: true,
+      callid: "0",
+      videoMinRecvBandwidth: "200",
+      videoMaxSendBandwidth: "2000",
+      videoMaxRecvBandwidth: "2000",
+      videoMinSendBandwidth: "200",
+    );
+    vcall.rejectedCall(message.data['session_to']).then((value) {
+      print("DARI CLIENT FIREBASE");
+    });
+    return null;
+  });
+  await ConnectycubeFlutterCallKit.setOnLockScreenVisibility(
+    isVisible: true,
+  );
 
-//   await _saveSession(message.data['session_from'], message.data['session_to'],
-//       message.data['record_id'], null);
-//   print('sessionFrom ${message.data['session_from']}');
-// }
+  await ConnectycubeFlutterCallKit.showCallNotification(
+    sessionId: Uuid().v4(),
+    callType: 1,
+    callerName: "Panggilan Video Call",
+    callerId: 0,
+    opponentsIds: {1},
+  );
 
-// Future<void> _saveSession(String sessionFrom, String sessionTo, String recordId,
-//     bool _isAccept) async {
-//   await prefs.setString('session_from', sessionFrom);
-//   await prefs.setString('session_to', sessionTo);
-//   await prefs.setString('record_id', recordId);
-//   await prefs.setBool('is_accept', _isAccept);
-//   await prefs.reload();
-//   print('Saved user inputs values.');
-// }
+  await _saveSession(
+      message.data['session_from'],
+      message.data['session_to'],
+      message.data['record_id'],
+      null,
+      message.data['callid'],
+      message.data['videoMinRecvBandwidth'],
+      message.data['videoMaxSendBandwidth'],
+      message.data['videoMaxRecvBandwidth'],
+      message.data['videoMinSendBandwidth']);
+  print('sessionFrom ${message.data['session_from']}');
+}
+
+Future<void> _saveSession(
+    String sessionFrom,
+    String sessionTo,
+    String recordId,
+    bool _isAccept,
+    String _callid,
+    String _videoMinRecvBandwidth,
+    String _videoMaxSendBandwidth,
+    String _videoMaxRecvBandwidth,
+    String _videoMinSendBandwidth) async {
+  await prefs.setString('session_from', sessionFrom);
+  await prefs.setString('session_to', sessionTo);
+  await prefs.setString('record_id', recordId);
+  await prefs.setBool('is_accept', _isAccept);
+
+  await prefs.setString('callid', _callid);
+  await prefs.setString('videoMinRecvBandwidth', _videoMinRecvBandwidth);
+  await prefs.setString('videoMaxSendBandwidth', _videoMaxSendBandwidth);
+  await prefs.setString('videoMaxRecvBandwidth', _videoMaxRecvBandwidth);
+  await prefs.setString('videoMinSendBandwidth', _videoMinSendBandwidth);
+
+  await prefs.reload();
+  print('Saved user inputs values.');
+}
 
 void _registerNotification() async {
   NotificationSettings settings = await _messaging.requestPermission(

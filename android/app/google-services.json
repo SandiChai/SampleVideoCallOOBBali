@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:1013064732570:android:6d084f05f6ec431af97423",
         "android_client_info": {
-          "package_name": "com.acs.dial_videocall"
+          "package_name": "com.dip.darmoresidence"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "1013064732570-gngkid9cac8ne7sid0rc5lehr3pot32u.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.acs.dial_videocall",
+            "package_name": "com.dip.darmoresidence",
             "certificate_hash": "918b293d0ba16c773477d90f008778fda842c064"
           }
         },
